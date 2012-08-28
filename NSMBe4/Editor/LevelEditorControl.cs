@@ -36,6 +36,8 @@ namespace NSMBe4
         public bool showDSScreen = false;
         public bool showGrid = false;
         public bool ignoreMouse = false;
+        public Image topBG;
+        public Image bottomBG;
 
         public Rectangle ViewablePixels;
         public Rectangle ViewableBlocks;
@@ -161,6 +163,8 @@ namespace NSMBe4
             Path
         }
 
+        
+
 
         public EditionMode mode = null;
 
@@ -188,6 +192,50 @@ namespace NSMBe4
 
             if (bgImage != null)
                 e.Graphics.DrawImage(bgImage, bgX, bgY);
+
+            //Set BG Images
+            if (Properties.Settings.Default.showBG)
+            {
+                foreach (NSMBView v in Level.Views)
+                {
+                    int x;
+                    int y;
+                    for (x = 0;; x++) //There is this bunch of code, because there is no function that let's the 512x512 Image auto-repeat. This will do it.
+                    {
+                        for (y = 0;; y++)
+                        {
+                            if ((y + 1) * 512 >= v.Height && (x + 1) * 512 >= v.Width) //There is no place for another 512 BG on both sides
+                            {
+                                e.Graphics.DrawImageUnscaledAndClipped(bottomBG, new Rectangle(v.X + x * 512, v.Y + y * 512, v.Width - x * 512, v.Height - y * 512));
+                                e.Graphics.DrawImageUnscaledAndClipped(topBG, new Rectangle(v.X + x * 512, v.Y + y * 512, v.Width - x * 512, v.Height - y * 512));
+                                break;
+                            }
+
+                            else if ((x + 1) * 512 >= v.Width) //There is no place for another 512 BG in the view on the right side
+                            {
+                                e.Graphics.DrawImageUnscaledAndClipped(bottomBG, new Rectangle(v.X + x * 512, v.Y + y * 512, v.Width - x * 512, 512));
+                                e.Graphics.DrawImageUnscaledAndClipped(topBG, new Rectangle(v.X + x * 512, v.Y + y * 512, v.Width - x * 512, 512));
+                            }
+
+                            else if ((y + 1) * 512 >= v.Height) //There is no place for another 512 BG in the view on the bottom side
+                            {
+                                e.Graphics.DrawImageUnscaledAndClipped(bottomBG, new Rectangle(v.X + x * 512, v.Y + y * 512, 512, v.Height - y * 512));
+                                e.Graphics.DrawImageUnscaledAndClipped(topBG, new Rectangle(v.X + x * 512, v.Y + y * 512, 512, v.Height - y * 512));
+                                break;
+                            }
+
+                            else //There is still place for a 512x512 BG in the view
+                            {
+                                e.Graphics.DrawImageUnscaled(bottomBG, new Rectangle(v.X + x * 512, v.Y + y * 512, 512, 512));
+                                e.Graphics.DrawImageUnscaled(topBG, new Rectangle(v.X + x * 512, v.Y + y * 512, 512, 512));
+                            }
+                            
+                        }
+                        if ((x + 1) * 512 >= v.Width && (y + 1) * 512 >= v.Height)
+                            break;
+                    }
+                }
+            }
 
             if (showGrid)
             {

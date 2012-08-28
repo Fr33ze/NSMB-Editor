@@ -64,7 +64,6 @@ namespace NSMBe4 {
                     target.Items.Add(trimmedname);
                 }
             }
-
         }
 
         private NSMBLevel Level;
@@ -132,6 +131,8 @@ namespace NSMBe4 {
                 }
             }
             updating = false;
+            EdControl.topBG = getBG(bgTopLayerComboBox, true);
+            EdControl.bottomBG = getBG(bgBottomLayerComboBox, false);
         }
 
         #region Previews
@@ -153,15 +154,41 @@ namespace NSMBe4 {
             return t.buffer;
         }
 
-        private void bgTopLayerPreviewButton_Click(object sender, EventArgs e) {
-            if (bgTopLayerComboBox.SelectedIndex == bgTopLayerComboBox.Items.Count - 1) {
+        private void bgTopLayerPreviewButton_Click(object sender, EventArgs e)
+        {
+            new ImagePreviewer(getBG(bgTopLayerComboBox, true)).Show();
+        }
+
+        private void bgBottomLayerPreviewButton_Click(object sender, EventArgs e)
+        {
+            new ImagePreviewer(getBG(bgBottomLayerComboBox, false)).Show();
+        }
+
+        public Image getBG(ComboBox x, bool top)
+        {
+            if (x.SelectedIndex == bgBottomLayerComboBox.Items.Count - 1)
+            {
                 MessageBox.Show(LanguageManager.Get("LevelConfig", "BlankBG"));
-                return;
+                return null;
             }
 
-            ushort GFXFileID = ROM.GetFileIDFromTable(bgTopLayerComboBox.SelectedIndex, ROM.Data.Table_FG_NCG);
-            ushort PalFileID = ROM.GetFileIDFromTable(bgTopLayerComboBox.SelectedIndex, ROM.Data.Table_FG_NCL);
-            ushort LayoutFileID = ROM.GetFileIDFromTable(bgTopLayerComboBox.SelectedIndex, ROM.Data.Table_FG_NSC);
+            ushort GFXFileID;
+            ushort PalFileID;
+            ushort LayoutFileID;
+
+            if (top) //Is a Top-BG
+            {
+                GFXFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_FG_NCG);
+                PalFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_FG_NCL);
+                LayoutFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_FG_NSC);
+            }
+
+            else //Is a Bot-BG
+            {
+                GFXFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_BG_NCG);
+                PalFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_BG_NCL);
+                LayoutFileID = ROM.GetFileIDFromTable(x.SelectedIndex, ROM.Data.Table_BG_NSC);
+            }
 
             File GFXFile = ROM.FS.getFileById(GFXFileID);
             File PalFile = ROM.FS.getFileById(PalFileID);
@@ -170,31 +197,13 @@ namespace NSMBe4 {
             if (GFXFile == null || PalFile == null || LayoutFile == null)
             {
                 MessageBox.Show(LanguageManager.Get("LevelConfig", "BrokenBG"));
-                return;
+                return null;
             }
 
-            new ImagePreviewer(RenderBackground(GFXFile, PalFile, LayoutFile, 256, 8)).Show();
-        }
-
-        private void bgBottomLayerPreviewButton_Click(object sender, EventArgs e) {
-            if (bgBottomLayerComboBox.SelectedIndex == bgBottomLayerComboBox.Items.Count - 1) {
-                MessageBox.Show(LanguageManager.Get("LevelConfig", "BlankBG"));
-                return;
-            }
-
-            ushort GFXFileID = ROM.GetFileIDFromTable(bgBottomLayerComboBox.SelectedIndex, ROM.Data.Table_BG_NCG);
-            ushort PalFileID = ROM.GetFileIDFromTable(bgBottomLayerComboBox.SelectedIndex, ROM.Data.Table_BG_NCL);
-            ushort LayoutFileID = ROM.GetFileIDFromTable(bgBottomLayerComboBox.SelectedIndex, ROM.Data.Table_BG_NSC);
-            File GFXFile = ROM.FS.getFileById(GFXFileID);
-            File PalFile = ROM.FS.getFileById(PalFileID);
-            File LayoutFile = ROM.FS.getFileById(LayoutFileID);
-
-            if (GFXFile == null || PalFile == null || LayoutFile == null) {
-                MessageBox.Show(LanguageManager.Get("LevelConfig", "BrokenBG"));
-                return;
-            }
-
-            new ImagePreviewer(RenderBackground(GFXFile, PalFile, LayoutFile, 576, 10)).Show();
+            if (top)
+                return RenderBackground(GFXFile, PalFile, LayoutFile, 256, 8);
+            else
+                return RenderBackground(GFXFile, PalFile, LayoutFile, 576, 10);
         }
 
         #endregion
@@ -267,7 +276,14 @@ namespace NSMBe4 {
 
         private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if(!bgTopLayerComboBox.SelectedText.Equals(""))
+                EdControl.topBG = getBG(bgTopLayerComboBox, true);
+            
+            if(!bgBottomLayerComboBox.SelectedText.Equals(""))
+                EdControl.bottomBG = getBG(bgBottomLayerComboBox, false);
+
             saveSettings();
+            EdControl.repaint();
         }
     }
 }

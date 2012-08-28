@@ -73,6 +73,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.coordinateViewer1 = new NSMBe4.Editor.CoordinateViewer();
             this.levelEditorControl1 = new NSMBe4.LevelEditorControl();
+            this.showBGs = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -367,7 +368,8 @@
             this.optionsMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.optionsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.reloadTilesets,
-            this.smallBlockOverlaysToolStripMenuItem});
+            this.smallBlockOverlaysToolStripMenuItem,
+            this.showBGs});
             this.optionsMenu.Image = ((System.Drawing.Image)(resources.GetObject("optionsMenu.Image")));
             this.optionsMenu.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.optionsMenu.Name = "optionsMenu";
@@ -427,7 +429,7 @@
             // openFileDialog1
             // 
             this.openFileDialog1.Filter = "Image Files (*.png; *.jpg; *.jpeg; *.bmp; *.gif; *.tiff)|*.png; *.jpg; *.jpeg; *." +
-    "bmp; *.gif; *.tiff|All Files (*.*)|*.*";
+                "bmp; *.gif; *.tiff|All Files (*.*)|*.*";
             // 
             // splitContainer1
             // 
@@ -549,6 +551,13 @@
             this.levelEditorControl1.Size = new System.Drawing.Size(775, 551);
             this.levelEditorControl1.TabIndex = 3;
             // 
+            // showBGs
+            // 
+            this.showBGs.Name = "showBGs";
+            this.showBGs.Size = new System.Drawing.Size(295, 22);
+            this.showBGs.Text = "Show Backgrounds";
+            this.showBGs.Click += new System.EventHandler(this.showBGs_Click);
+            // 
             // LevelEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -631,6 +640,7 @@
         private System.Windows.Forms.TabPage tabPage2;
         public Editor.CoordinateViewer coordinateViewer1;
         private System.Windows.Forms.ToolStripButton showGridButton;
+        private System.Windows.Forms.ToolStripMenuItem showBGs;
     }
 }
 

@@ -731,10 +731,10 @@
         private System.Windows.Forms.ComboBox tilesetComboBox;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button bgTopLayerPreviewButton;
-        private System.Windows.Forms.ComboBox bgTopLayerComboBox;
+        public System.Windows.Forms.ComboBox bgTopLayerComboBox;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Button bgBottomLayerPreviewButton;
-        private System.Windows.Forms.ComboBox bgBottomLayerComboBox;
+        public System.Windows.Forms.ComboBox bgBottomLayerComboBox;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label label2;

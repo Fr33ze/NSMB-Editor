@@ -51,6 +51,7 @@ namespace NSMBe4 {
             this.LevelFilename = LevelFilename;
 
             smallBlockOverlaysToolStripMenuItem.Checked = Properties.Settings.Default.SmallBlockOverlays;
+            showBGs.Checked = Properties.Settings.Default.showBG;
 
             LanguageManager.ApplyToContainer(this, "LevelEditor");
             this.Text = LanguageManager.Get("General", "EditingSomething") + " " + LevelName;
@@ -99,7 +100,6 @@ namespace NSMBe4 {
         }
 
         private LevelMinimap MinimapForm;
-        private LevelConfig LevelConfigForm;
         private NSMBLevel Level;
         private NSMBGraphics GFX;
 
@@ -287,6 +287,15 @@ namespace NSMBe4 {
         {
             levelEditorControl1.showGrid = showGridButton.Checked;
             levelEditorControl1.repaint();
+        }
+
+        private void showBGs_Click(object sender, EventArgs e)
+        {
+            showBGs.Checked = !showBGs.Checked;
+            Properties.Settings.Default.showBG = showBGs.Checked;
+            Properties.Settings.Default.Save();
+            Level.ReRenderAll();
+            Invalidate(true);
         }
 
     }
