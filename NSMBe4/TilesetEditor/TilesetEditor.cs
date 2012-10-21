@@ -33,10 +33,8 @@ namespace NSMBe4
         ushort TilesetID;
         List<string> descriptions;
         bool descExists;
+        int pSelectedIndex = -1;
         
-        //Remind Freeze to delete this
-        ComboBox[] combos;
-
         public TilesetEditor(ushort TilesetID, string tilesetName) {
             InitializeComponent();
             if (Properties.Settings.Default.mdi)
@@ -97,42 +95,7 @@ namespace NSMBe4
             this.Icon = Properties.Resources.nsmbe;
 
             //Loads the Tile-behaviors from the "behaviors.txt" file.
-            loadBehaviorsFromFile();
-        }
-
-        //Remind freeze to delete this function when making the new Tilebehavrior system
-        private void loadBehaviorsFromFile()
-        {
-            System.IO.StreamReader bhReader = new System.IO.StreamReader("behaviors.txt", System.Text.Encoding.Default);
-            String curLine;
-            int comboBoxNumber = -1;
-            Label[] labs = { oneLab, twoLab, threeLab, fourLab, fiveLab, sixLab, sevenLab, eightLab };
-            combos = new ComboBox[] { one, two, three, four, five, six, seven, eight };
-            while (!bhReader.EndOfStream)
-            {
-                curLine = bhReader.ReadLine();
-                if(!curLine.Equals(""))
-                {
-                    if (!curLine.Contains(" - "))
-                    {
-                        comboBoxNumber++;
-                        labs[comboBoxNumber].Text = curLine;
-                    }
-                    else
-                    {
-                        String[] splitted = curLine.Split(new String[] {" - "}, StringSplitOptions.None);
-                        combos[comboBoxNumber].Items.Add(new TileBehavior(splitted[0], splitted[1]));
-                    }
-                }
-            }
-            comboBoxNumber++;
-            bhReader.Close();
-            for (; comboBoxNumber < combos.Length; comboBoxNumber++)
-            {
-                combos[comboBoxNumber].Visible = false;
-                labs[comboBoxNumber].Visible = false;
-            }
-
+            behaviorList.Items.AddRange(TileBehavior.readFromFile(System.IO.Path.Combine(Application.StartupPath, "behaviors.txt")).ToArray());
         }
 
         private void objectPickerControl1_ObjectSelected()
@@ -164,6 +127,7 @@ namespace NSMBe4
         private void mustRepaintObjects()
         {
             t.map16.reRenderAll();
+            tilemapEditor1.Invalidate(true);
             tilemapEditor1.reload();
         }
 
@@ -193,37 +157,7 @@ namespace NSMBe4
                 mustRepaintObjects();
             }
         }
-
-        private void exportButton_Click_1(object sender, EventArgs e)
-        {
-            if (saveFileDialog1.ShowDialog() != DialogResult.OK) return;
-            t.ExportGFX(saveFileDialog1.FileName);
-        }
-
-        private void importButton_Click(object sender, EventArgs e)
-        {
-            if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
-            t.ImportGFX(openFileDialog1.FileName, false);
-            mustRepaintObjects();
-        }
-
-        private void exportTilesetButton_Click(object sender, EventArgs e)
-        {
-            if (saveFileDialog2.ShowDialog() != DialogResult.OK)
-                return;
-
-            t.exportTileset(saveFileDialog2.FileName);
-        }
-
-        private void importTilesetButton_Click(object sender, EventArgs e)
-        {
-            if (openFileDialog2.ShowDialog() != DialogResult.OK)
-                return;
-
-            t.importTileset(openFileDialog2.FileName);
-            mustRepaintObjects();
-        }
-
+        
         private void createDescriptions_Click(object sender, EventArgs e)
         {
             ROM.UserInfo.createDescriptions(TilesetID);
@@ -257,7 +191,7 @@ namespace NSMBe4
             deleteDescriptions.Visible = false;
             tilesetObjectEditor1.descBox.Visible = false;
             tilesetObjectEditor1.descLbl.Visible = false;
-            if (TilesetID != 65535)
+            if (TilesetID != 65535) // The Jyotyu tileset
                 t.UseNotes = false;
             else //Restore the original notes
                 t.ObjNotes = NSMBGraphics.GetDescriptions(LanguageManager.GetList("ObjNotes"));
@@ -265,6 +199,59 @@ namespace NSMBe4
             objectPickerControl1.Invalidate(true);
         }
 
+        private void copyPalettes_Click(object sender, EventArgs e)
+        {
+        	int repeat = 12;
+        	
+        	//Copy map16
+
+        	for(int p = 1; p < t.palettes.Length; p++)
+        		for(int x = 0; x < 32; x++)
+        			for(int y = 0; y < repeat*2; y++)
+        			{
+        				t.map16.tiles[x, y+p*repeat*2] = t.map16.tiles[x, y];
+        				t.map16.tiles[x, y+p*repeat*2].palNum = (t.map16.tiles[x, y+p*repeat*2].palNum+p)%t.palettes.Length;
+        			}
+        	
+        	//Copy Tile behaviors
+        	for(int p = 1; p < t.palettes.Length; p++)
+        		for(int x = 0; x < 16*repeat; x++)
+        			t.TileBehaviors[x+p*16*repeat] = t.TileBehaviors[x];
+        	
+        	//And now copy objects. Meh
+        	int objCount = 0;
+        	while(objCount < t.Objects.Length && t.Objects[objCount] != null)
+        		objCount++;
+        	
+        	for(int p = 1; p < t.palettes.Length; p++)
+        	{
+        		for(int i = 0; i < objCount; i++)
+        		{
+        			if(i+p*objCount >= t.Objects.Length)
+        				continue;
+        			
+		    		NSMBTileset.ObjectDef o = new NSMBTileset.ObjectDef(t);
+		    		o.tiles.Clear();
+		    		foreach(List<NSMBTileset.ObjectDefTile> row in t.Objects[i].tiles)
+		    		{
+		    			List<NSMBTileset.ObjectDefTile> row2 = new List<NSMBTileset.ObjectDefTile>();
+			    		foreach(NSMBTileset.ObjectDefTile tile in row)
+		    			{
+		    				NSMBTileset.ObjectDefTile tile2 = new NSMBTileset.ObjectDefTile(t);
+		    				tile2.tileID = (tile.tileID + repeat*16*p) % 768;
+		    				tile2.controlByte = tile.controlByte;
+		    				row2.Add(tile2);
+		    			}
+		    			o.tiles.Add(row2);
+		    		}
+		    		t.Objects[i+p*objCount] = o;
+		    	}
+        	}
+        	//TODO merp
+
+        	mustRepaintObjects();
+        }
+        
         private void setend_Click(object sender, EventArgs e)
         {
             int i = 0;
@@ -296,8 +283,11 @@ namespace NSMBe4
 
         private void tileBehaviorEditor_ValueChanged(byte[] val)
         {
-            //Remind freeze to delete this function when making the new Tilebehavrior system
-            clear_boxes(null);
+            foreach (TileBehavior item in behaviorList.Items)
+                if (behaviorsEqual(val, item.tb)) {
+                    behaviorList.SelectedItem = item;
+                    break;
+                }
 
             int newBehavior = 0;
             for (int i = 0; i < 4; i++)
@@ -308,74 +298,52 @@ namespace NSMBe4
                     t.TileBehaviors[tileBehaviorPicker.selTileNum + x + y*tileBehaviorPicker.bufferWidth] = newBehavior;
         }
 
+        private bool behaviorsEqual(byte[] b1, byte[] b2)
+        {
+            if (b1 == null || b2 == null) return false;
+            for(int i = 0; i < 4; i++)
+            	if(b1[i] != b2[i]) return false;
+            return true;
+        }
+
         private void imageManager1_SomethingSaved()
         {
             mustRepaintObjects();
         }
 
-        //Remind freeze to delete this function when making the new Tilebehavrior system
-        private void clear_boxes(ComboBox notClear)
+        private void behaviorList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            for (int count = 0; count < combos.Length; count++)
-            {
-                if (notClear == combos[count])
-                {
-                }
-                else
-                {
-                    combos[count].Text = "";
-                }
+            if (behaviorList.SelectedIndex == pSelectedIndex)
+                return;
+            TileBehavior item = (TileBehavior)behaviorList.SelectedItem;
+            if (item.isHeader) {
+                behaviorList.SelectedIndex = pSelectedIndex;
+                return;
             }
+            tileBehaviorEditor.setArray(((TileBehavior)behaviorList.SelectedItem).tb);
+            pSelectedIndex = behaviorList.SelectedIndex;
         }
 
-        private void one_SelectedIndexChanged(object sender, EventArgs e)
+        private void behaviorList_DrawItem(object sender, DrawItemEventArgs e)
         {
-            tileBehaviorEditor.setArray(((TileBehavior)one.SelectedItem).getTb());
-            clear_boxes(one);
-
+            e.DrawBackground();
+            if (e.Index == -1)
+                return;
+            TileBehavior item = (TileBehavior)behaviorList.Items[e.Index];
+            System.Drawing.Font newFont = behaviorList.Font;
+            Color backColor = e.BackColor;
+            Color foreColor = e.ForeColor;
+            if (item.isHeader)
+            {
+                backColor = behaviorList.BackColor;
+                foreColor = behaviorList.ForeColor;
+                newFont = new Font(newFont, FontStyle.Bold);
+                using (SolidBrush b = new SolidBrush(backColor))
+                    e.Graphics.FillRectangle(b, e.Bounds);
+                using (Pen p = new Pen(foreColor))
+                    e.Graphics.DrawLine(p, e.Bounds.Left + 4, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
+            }
+            TextRenderer.DrawText(e.Graphics, item.ToString(), newFont, e.Bounds, foreColor, backColor, TextFormatFlags.Left);
         }
-
-        private void two_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)two.SelectedItem).getTb());
-            clear_boxes(two);
-        }
-
-        private void three_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)three.SelectedItem).getTb());
-            clear_boxes(three);
-        }
-
-        private void four_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)four.SelectedItem).getTb());
-            clear_boxes(four);
-        }
-
-        private void five_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)five.SelectedItem).getTb());
-            clear_boxes(five);
-        }
-
-        private void six_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)six.SelectedItem).getTb());
-            clear_boxes(six);
-        }
-
-        private void seven_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)seven.SelectedItem).getTb());
-            clear_boxes(seven);
-        }
-
-        private void eight_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            tileBehaviorEditor.setArray(((TileBehavior)eight.SelectedItem).getTb());
-            clear_boxes(eight);
-        }
-
     }
 }

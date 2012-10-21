@@ -100,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteArrayInputStream.cs" />
-    <Compile Include="DSFileSystem\Arm9BinaryHandler.cs" />
+    <Compile Include="Patcher\Arm9BinaryHandler.cs" />
     <Compile Include="Editor\CoordinateViewer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -551,7 +551,6 @@
     <None Include="Resources\calculator-scientific.png" />
     <None Include="Resources\file_narc.png" />
     <Content Include="Editor\nsmbe.ico" />
-    <Content Include="GraphicsEditor\nsmbe.ico" />
     <Content Include="Resources\version.txt" />
     <None Include="Resources\Sprite Images\Brick.PNG" />
     <None Include="Resources\Sprite Images\JumpingQBlock.PNG" />
@@ -833,7 +832,7 @@
       <DependentUpon>ByteArrayEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="ByteArrayOutputStream.cs" />
-    <Compile Include="DSFileSystem\Arm9BinSection.cs" />
+    <Compile Include="Patcher\Arm9BinSection.cs" />
     <Compile Include="DSFileSystem\BannerFile.cs" />
     <Compile Include="DSFileSystem\ExternalFilesystemSource.cs" />
     <Compile Include="DSFileSystem\File.cs" />
@@ -896,6 +895,7 @@
     </Compile>
     <Compile Include="GraphicsEditor\FilePalette.cs" />
     <Compile Include="GraphicsEditor\PalettedImage.cs" />
+    <Compile Include="GraphicsEditor\Bncd.cs" />
     <Compile Include="GraphicsEditor\PaletteViewer.cs">
       <SubType>Form</SubType>
     </Compile>

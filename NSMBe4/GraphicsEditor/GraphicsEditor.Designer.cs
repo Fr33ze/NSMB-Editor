@@ -42,8 +42,8 @@
             this.redoButton = new System.Windows.Forms.Button();
             this.rectangleTool = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
-            this.palettePicker1 = new NSMBe4.PalettePicker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.palettePicker1 = new NSMBe4.PalettePicker();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.drawingBox)).BeginInit();
             this.SuspendLayout();
@@ -167,9 +167,9 @@
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoScroll = true;
             this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -181,7 +181,7 @@
             // 
             // drawingBox
             // 
-            this.drawingBox.BackColor = System.Drawing.SystemColors.Control;
+            this.drawingBox.BackColor = System.Drawing.Color.Silver;
             this.drawingBox.Location = new System.Drawing.Point(0, 0);
             this.drawingBox.Name = "drawingBox";
             this.drawingBox.Size = new System.Drawing.Size(100, 50);
@@ -304,12 +304,12 @@
         private System.Windows.Forms.Label hoverStatus;
         private System.Windows.Forms.Panel panel1;
         private PalettePicker palettePicker1;
-        private System.Windows.Forms.PictureBox drawingBox;
         private System.Windows.Forms.Label imageStatus;
         private System.Windows.Forms.Button undoButton;
         private System.Windows.Forms.Button redoButton;
         private System.Windows.Forms.Button rectangleTool;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.PictureBox drawingBox;
     }
 }

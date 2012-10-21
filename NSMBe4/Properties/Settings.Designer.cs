@@ -133,6 +133,7 @@ namespace NSMBe4.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+<<<<<<< HEAD
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool showBG {
             get {
@@ -140,6 +141,39 @@ namespace NSMBe4.Properties {
             }
             set {
                 this["showBG"] = value;
+=======
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowResizeHandles {
+            get {
+                return ((bool)(this["ShowResizeHandles"]));
+            }
+            set {
+                this["ShowResizeHandles"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int AutoBackup {
+            get {
+                return ((int)(this["AutoBackup"]));
+            }
+            set {
+                this["AutoBackup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BackupFiles {
+            get {
+                return ((string)(this["BackupFiles"]));
+            }
+            set {
+                this["BackupFiles"] = value;
+>>>>>>> upstream/master
             }
         }
     }

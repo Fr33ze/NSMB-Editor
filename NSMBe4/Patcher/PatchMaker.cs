@@ -25,12 +25,12 @@ namespace NSMBe4.Patcher
     public class PatchMaker
     {
         private int ArenaLoOffs;
-        NSMBe4.DSFileSystem.Arm9BinaryHandler handler;
+        Arm9BinaryHandler handler;
         DirectoryInfo romdir;
 
         public PatchMaker(DirectoryInfo romdir)
         {
-            handler = new DSFileSystem.Arm9BinaryHandler(ROM.FS);
+            handler = new Arm9BinaryHandler(ROM.FS);
             this.romdir = romdir;
         }
 
@@ -38,7 +38,7 @@ namespace NSMBe4.Patcher
 		{
             handler.load();
             loadArenaLoOffsFile(romdir);
-            uint codeAddr = handler.readFromRamAddr(ArenaLoOffs);
+            uint codeAddr = handler.readFromRamAddr(ArenaLoOffs, -1);
             return codeAddr;
 		}
 		
@@ -112,7 +112,7 @@ namespace NSMBe4.Patcher
                             thisHookAddr = hookAddr;
                             val = makeBranchOpcode(ramAddr, hookAddr, false);
 
-                            uint originalOpcode = handler.readFromRamAddr(ramAddr);
+                            uint originalOpcode = handler.readFromRamAddr(ramAddr, ovId);
                             
                             //TODO: Parse and fix original opcode in case of BL instructions
                             //so it's possible to hook over them too.
@@ -136,16 +136,16 @@ namespace NSMBe4.Patcher
                     Console.Out.WriteLine(String.Format("{0:X8}:{1:X8} = {2:X8}", patchCategory, ramAddr, val));
                     Console.Out.WriteLine(String.Format("              {0:X8} {1:X8}", destRamAddr, thisHookAddr));
 
-                    handler.writeToRamAddr(ramAddr, val);
+                    handler.writeToRamAddr(ramAddr, val, ovId);
                 }
             }
 
             s.Close();
 
             int newArenaOffs = codeAddr + extradata.getPos();
-            handler.writeToRamAddr(ArenaLoOffs, (uint)newArenaOffs);
+            handler.writeToRamAddr(ArenaLoOffs, (uint)newArenaOffs, -1);
 
-            handler.sections.Add(new NSMBe4.DSFileSystem.Arm9BinSection(extradata.getArray(), codeAddr, 0));
+            handler.sections.Add(new Arm9BinSection(extradata.getArray(), codeAddr, 0));
             handler.saveSections();
         }
 

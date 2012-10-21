@@ -36,6 +36,9 @@ namespace NSMBe4 {
     {
         public static ImageManagerWindow imgMgr;
         public TextInputForm textForm = new TextInputForm();
+        // init has to be used because Winforms is setting the value of autoBackupTime before the form loads
+        //   This causes it to be saved in the settings before the settings value is loaded.
+        public bool init = false;
 
         public static void showImgMgr()
         {
@@ -58,11 +61,16 @@ namespace NSMBe4 {
             hexEditLevelButton.Enabled = false;
             useMDI.Checked = Properties.Settings.Default.mdi;
             autoUpdate.Checked = Properties.Settings.Default.AutoUpdateSD;
+            chkAutoBackup.Checked = Properties.Settings.Default.AutoBackup > 0;
+            if (chkAutoBackup.Checked)
+                autoBackupTime.Value = Properties.Settings.Default.AutoBackup;
+            init = true;
 
             filesystemBrowser1.Load(ROM.FS);
 
             LoadLevelNames();
-            musicList.Items.AddRange(ROM.UserInfo.getFullList("Music").ToArray());
+            if (ROM.UserInfo != null)
+                musicList.Items.AddRange(ROM.UserInfo.getFullList("Music").ToArray());
 
             LanguageManager.ApplyToContainer(this, "LevelChooser");
             importLevelDialog.Filter = LanguageManager.Get("LevelChooser", "LevelFilter");
@@ -82,6 +90,26 @@ namespace NSMBe4 {
                 }
             }
 
+            // Load filebackups from crash
+            string backupPath = Path.Combine(Application.StartupPath, "Backup");
+            if (ROM.fileBackups.Count > 0)
+                foreach (string filename in ROM.fileBackups)
+                    try
+                    {
+                        byte[] levelFile; byte[] bgFile; string[] error;
+                        FileStream fs = new System.IO.FileStream(Path.Combine(backupPath, filename + ".nml"), FileMode.Open);
+                        BinaryReader br = new BinaryReader(fs);
+                        NSMBLevel.getImportLevel(out levelFile, out bgFile, out error, br);
+                        br.Close();
+                        if (error == null)
+                        {
+                            LevelEditor newEditor = new LevelEditor(filename, filename + " - Recovered Level", levelFile, bgFile);
+                            newEditor.Show();
+                        }
+                    }
+                    catch (Exception) { }
+
+
             this.Text = "NSMB Editor 5.2 Beta";
             label3.Text = "NSMB Editor 5.2 " + Properties.Resources.version.Trim();
             this.Icon = Properties.Resources.nsmbe;
@@ -92,6 +120,7 @@ namespace NSMBe4 {
                 tabControl1.TabPages.Remove(tabPage5);
                 tabControl1.TabPages.Remove(tabPage6);
                 nsmbToolsGroupbox.Enabled = false;
+                musicSlotsGrp.Enabled = false;
             }
 
 //            new LevelEditor("A01_1", "LOL").Show();
@@ -765,6 +794,8 @@ namespace NSMBe4 {
             Console.Out.WriteLine(e.CloseReason.ToString());
             if (MdiParentForm.instance != null && e.CloseReason != CloseReason.MdiFormClosing)
                 MdiParentForm.instance.Close();
+            Properties.Settings.Default.BackupFiles = "";
+            Properties.Settings.Default.Save();
         }
 
         private void makeclean_Click(object sender, EventArgs e)
@@ -789,6 +820,8 @@ namespace NSMBe4 {
 
         private void renameBtn_Click(object sender, EventArgs e)
         {
+            if (musicList.SelectedIndex == -1)
+                return;
             string newName;
             string oldName = musicList.SelectedItem.ToString();
             oldName = oldName.Substring(oldName.IndexOf(" ") + 1);
@@ -802,6 +835,15 @@ namespace NSMBe4 {
                 }
                 ROM.UserInfo.setListItem("Music", musicList.SelectedIndex, newName, true);
                 musicList.Items[musicList.SelectedIndex] = string.Format("{0:X2}: {1}", ROM.MusicNumbers[musicList.SelectedIndex], newName);
+            }
+        }
+
+        private void autoBackupTime_ValueChanged(object sender, EventArgs e)
+        {
+            if (init)
+            {
+                Properties.Settings.Default.AutoBackup = chkAutoBackup.Checked ? (int)autoBackupTime.Value : 0;
+                Properties.Settings.Default.Save();
             }
         }
     }
